@@ -89,4 +89,5 @@ Place the trained model inside the `saved_model` folder before running the proje
 ## Author
 
 Developed as a Final Year Project.
+<img width="1920" height="1080" alt="Screenshot 2026-02-25 155747" src="https://github.com/user-attachments/assets/9e433f17-28b7-4190-9762-8dbb42181ed6" />
 
