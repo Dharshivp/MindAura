@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="background: #111; min-height: 100vh; padding: 50px; color: white;">
+    <div style="max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px;">
+        <h2>Edit Practitioner Details</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Full Name</label><br>
+            <input type="text" name="name" value="{{ counselor.name }}" style="width:100%; margin-bottom:15px; padding:10px;">
+            
+            <label>Education</label><br>
+            <input type="text" name="education" value="{{ counselor.education }}" style="width:100%; margin-bottom:15px; padding:10px;">
+            
+            <label>Location</label><br>
+            <input type="text" name="location" value="{{ counselor.location }}" style="width:100%; margin-bottom:15px; padding:10px;">
+            
+            <label>Change Profile Photo</label><br>
+            <input type="file" name="profile_pic" style="margin-bottom:20px;"><br>
+            
+            <button type="submit" style="background:#ffd86b; color:#111; padding:15px 30px; border:none; border-radius:10px; font-weight:bold;">Save Changes</button>
+            <a href="/admin_dashboard" style="color:#ccc; margin-left:20px;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

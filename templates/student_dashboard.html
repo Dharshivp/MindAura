@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MindAura | Student Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {  --accent: #8e94f2; --counselor-green: #4a7c59; --glass: rgba(255, 255, 255, 0.85); }
+        
+        body { 
+            margin: 0; 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            font-family: 'Segoe UI', sans-serif; 
+            transition: background 0.5s ease; 
+        }
+        
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 300px;
+            background: var(--glass); backdrop-filter: blur(12px);
+            padding: 20px; border-right: 1px solid rgba(0,0,0,0.1); z-index: 100; overflow-y: auto;
+        }
+        
+        .main-content { margin-left: 340px; padding: 20px; max-width: 1000px; }
+
+        /* BERT Alerts & Counselor Requests */
+        .alert {
+            padding: 15px; margin-bottom: 20px; border-radius: 12px; font-weight: 600;
+            animation: slideDown 0.5s ease; border: 1px solid transparent;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .alert-warning { background: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .request-card {
+            background: #e7f3ff; border-left: 8px solid #007bff; padding: 20px;
+            border-radius: 15px; margin-bottom: 20px; display: flex; 
+            justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Modified to include .creative-section */
+        .journal-container, .counselor-section, .creative-section {
+            background:  border-radius: 25px; padding: 25px; 
+            min-height: 70vh; display: flex; flex-direction: column;
+        }
+
+        .chat-box { flex-grow: 1; overflow-y: auto; height: 400px; margin-bottom: 20px; padding: 10px; display: flex; flex-direction: column; }
+        .msg { margin: 8px 0; padding: 12px; border-radius: 15px; max-width: 80%; animation: fadeIn 0.3s ease; }
+        .user-msg { background: #e2e2e2; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .ai-msg { background: #f0f4ff; border: 1px solid #d0d7ff; align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .temp-thumb { width: 100%; height: 50px; border-radius: 8px; cursor: pointer; background-size: cover; transition: 0.2s; border: 2px solid transparent; }
+        .temp-thumb:hover { border-color: var(--accent); transform: scale(1.05); }
+
+        .counselor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .counselor-card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .counselor-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+
+        button.action-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; background: var(--accent); color: white; cursor: pointer; font-weight: 600; transition: 0.3s; position: relative; }
+        button.action-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .req-btn { background: var(--counselor-green) !important; }
+        .hidden { display: none !important; }
+
+        /* New Relaxation Styles */
+        .music-player { background: rgba(255,255,255,0.6); padding: 10px; border-radius: 15px; margin-top: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .relax-game-container { 
+            text-align: center; background: white; padding: 15px; border-radius: 15px; margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .breathing-circle {
+            width: 80px; height: 80px; background: var(--accent); border-radius: 50%; margin: 10px auto;
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
+            transition: transform 4s ease-in-out;
+        }
+        .breathe-in { transform: scale(1.6); background: #a2d2ff; }
+        .breathe-out { transform: scale(1.0); background: #8e94f2; }
+
+        .notif-badge {
+            position: absolute; top: -8px; right: -8px; background: #ff4b2b; color: white;
+            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
+            justify-content: center; font-size: 0.75rem; border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: bounce 2s infinite;
+        }
+
+        /* Added Writing Styles */
+        #writing-preview-box {
+            width: 100%; aspect-ratio: 16/9; border-radius: 15px; position: relative;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .writing-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 1; }
+        .writing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 2; }
+        #writing-display-text { position: relative; z-index: 3; color: white; font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); margin: 0; }
+        .preset-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; }
+
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-5px);} 60% {transform: translateY(-3px);} }
+        textarea { width: 100%; border-radius: 12px; padding: 12px; border: 1px solid #ccc; outline: none; resize: none; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body id="bg-body" style="background-image: url('https://media.istockphoto.com/id/1323061375/photo/bright-garlands-of-striped-triangle-banners-in-colors-of-lgbtq-flag-on-street-of-paris-france.jpg?s=612x612&w=0&k=20&c=-ligsNfWiMYOcRac0-pjoAoBkunNLF4PGxypr--PpS4=');">
+
+<div class="sidebar">
+    <h3>Hello, {{ student.name }} 👋</h3>
+    <button class="action-btn" id="btn-show-journal">✍️ My Journal</button>
+    <button class="action-btn" id="btn-show-counselors" onclick="clearNotifs()" style="background: #6c757d;">
+    {% if accepted_count and accepted_count > 0 %}
+        <span class="notif-badge" id="badge-dot">{{ accepted_count }}</span>
+    {% endif %}
+    🤝 View Counselors
+    </button>
+    
+    <button class="action-btn" id="btn-show-writing" style="background: #ff85a1;">🎨 Your Thoughts </button>
+    
+    <hr>
+    
+    <h4>🎧 Focus Sounds</h4>
+    <div class="music-player">
+        <select id="track-select" style="width: 100%; padding: 5px; border-radius: 5px; margin-bottom: 5px;">
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Lofi Beats</option>
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3">Rain & Thunder</option>
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Soft Piano</option>
+        </select>
+        <audio id="audio-player" style="width: 100%; height: 30px;" controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    </div>
+
+    <div class="relax-game-container">
+        <h4 style="margin: 0;">🧘 Quick Breathe</h4>
+        <div id="breathe-circle" class="breathing-circle">In</div>
+        <button onclick="toggleBreathing()" class="action-btn" style="padding: 5px; font-size: 0.8rem; background: #6c757d;">Start Session</button>
+    </div>
+
+    <hr>
+    <h4>Journal Themes</h4>
+    <div class="template-grid">
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/a6/26/1a/a6261a696b9d3729dabe200e9065f297.jpg')" onclick="changeBg('https://i.pinimg.com/736x/a6/26/1a/a6261a696b9d3729dabe200e9065f297.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/1200x/75/d4/85/75d485cfaead689f44ee2d6e7611815a.jpg')" onclick="changeBg('https://i.pinimg.com/1200x/75/d4/85/75d485cfaead689f44ee2d6e7611815a.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/12/99/de/1299dec7b0bd8aa198546140f96da5ae.jpg')" onclick="changeBg('https://i.pinimg.com/736x/12/99/de/1299dec7b0bd8aa198546140f96da5ae.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/originals/a4/1b/2a/a41b2acad5b92062e7ee93ffea1d376c.png')" onclick="changeBg('https://i.pinimg.com/originals/a4/1b/2a/a41b2acad5b92062e7ee93ffea1d376c.png')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/8c/5d/0a/8c5d0a59f1883404d6d58bc2ff7b81a3.jpg')" onclick="changeBg('https://i.pinimg.com/736x/8c/5d/0a/8c5d0a59f1883404d6d58bc2ff7b81a3.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/0c/bc/d2/0cbcd2692adb7778f44ca7efa13bdc6f.jpg')" onclick="changeBg('https://i.pinimg.com/736x/0c/bc/d2/0cbcd2692adb7778f44ca7efa13bdc6f.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/b5/cf/31/b5cf3177bb355bf4747694da76175e18.jpg')" onclick="changeBg('https://i.pinimg.com/736x/b5/cf/31/b5cf3177bb355bf4747694da76175e18.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/ae/06/1e/ae061e257034ed14715c59d2db72dacb.jpg')" onclick="changeBg('https://i.pinimg.com/736x/ae/06/1e/ae061e257034ed14715c59d2db72dacb.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/db/95/e7/db95e7b9a6e4c30bbda7a6489018cb30.jpg')" onclick="changeBg('https://i.pinimg.com/736x/db/95/e7/db95e7b9a6e4c30bbda7a6489018cb30.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/24/ea/1f/24ea1f9c836e88906a766aa088f5de14.jpg')" onclick="changeBg('https://i.pinimg.com/736x/24/ea/1f/24ea1f9c836e88906a766aa088f5de14.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/97/9c/3b/979c3b87077f3de1d4ba3267ccf3c71f.jpg')" onclick="changeBg('https://i.pinimg.com/736x/97/9c/3b/979c3b87077f3de1d4ba3267ccf3c71f.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/e8/a4/46/e8a446bad563fc09ebb69978eb568fb7.jpg')" onclick="changeBg('https://i.pinimg.com/736x/e8/a4/46/e8a446bad563fc09ebb69978eb568fb7.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/41/d3/d4/41d3d4904aad4ac660c3e70b88557212.jpg')" onclick="changeBg('https://i.pinimg.com/736x/41/d3/d4/41d3d4904aad4ac660c3e70b88557212.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/41/99/7d/41997da37c140c556e4e109abd36b9ee.jpg')" onclick="changeBg('https://i.pinimg.com/736x/41/99/7d/41997da37c140c556e4e109abd36b9ee.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/86/b0/c4/86b0c447dd2ba17fd9829384eb6c559e.jpg')" onclick="changeBg('https://i.pinimg.com/736x/86/b0/c4/86b0c447dd2ba17fd9829384eb6c559e.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/52/22/27/522227ede4c9aec6a3e2c925d4d93583.jpg')" onclick="changeBg('https://i.pinimg.com/736x/52/22/27/522227ede4c9aec6a3e2c925d4d93583.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/a4/54/60/a45460c4b2b2b2f1b0ec36c63ab3619a.jpg')" onclick="changeBg('https://i.pinimg.com/736x/a4/54/60/a45460c4b2b2b2f1b0ec36c63ab3619a.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/19/c2/31/19c2313729527169334039fcc764b3f6.jpg')" onclick="changeBg('https://i.pinimg.com/736x/19/c2/31/19c2313729527169334039fcc764b3f6.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/1200x/75/7b/81/757b819e269be0166968e8728149b9e4.jpg')" onclick="changeBg('https://i.pinimg.com/1200x/75/7b/81/757b819e269be0166968e8728149b9e4.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/88/0d/48/880d48c335c0c072543b03be1293b591.jpg')" onclick="changeBg('https://i.pinimg.com/736x/88/0d/48/880d48c335c0c072543b03be1293b591.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/ca/bf/e1/cabfe10c1285d184971538e0eacc0aed.jpg')" onclick="changeBg('https://i.pinimg.com/736x/ca/bf/e1/cabfe10c1285d184971538e0eacc0aed.jpg')"></div>
+        <div class="temp-thumb" style="background-image:url('https://i.pinimg.com/736x/68/bf/cb/68bfcb8b44cc84d5e75cfba7963c8a81.jpg')" onclick="changeBg('https://i.pinimg.com/736x/68/bf/cb/68bfcb8b44cc84d5e75cfba7963c8a81.jpg')"></div>
+    </div>
+
+    <hr>
+    <h4>Live Stress Level</h4>
+    <canvas id="stressChart"></canvas>
+    <div style="margin-top: 15px; font-size: 0.9rem; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
+        <p>Mood: <b id="current-mood">{{ current_mood or 'Neutral' }}</b></p>
+    </div>
+</div>
+
+<div class="main-content">
+    
+    <div id="request-area">
+    {% for req in chat_requests %}
+        {% if req.status == 'pending' %}
+        <div class="request-card">
+            <div>
+                <strong style="font-size: 1.1rem; color: #0056b3;">🤝 Check chat request status.</strong>
+                <p style="margin: 5px 0; color: #444;">They've offered a private session to support you.</p>
+            </div>
+            <a href="{{ url_for('accept_counselor_request', request_id=req.id) }}" 
+               class="action-btn" 
+               style="background: #28a745; text-decoration: none; padding: 10px 20px; width: auto; display: inline-block; text-align: center;">
+                view
+            </a>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+
+    <div id="alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <div id="journal-view" class="journal-container">
+        <div class="chat-box" id="chat-box">
+            {% for chat in ai_chats %}
+                <div class="msg {% if chat.sender == 'ai' %}ai-msg{% else %}user-msg{% endif %}">
+                    {{ chat.message }}
+                </div>
+            {% endfor %}
+        </div>
+        <form method="POST" style="display:flex; gap:10px;">
+            <textarea id="user-input" name="text" rows="2" placeholder="Write your heart out..." required></textarea>
+            <button type="submit" class="action-btn" style="width:100px; margin:0;">Send ✨</button>
+        </form>
+    </div>
+
+    <div id="counselor-view" class="counselor-section hidden">
+        <h2>Professional Support</h2>
+        <div class="counselor-grid">
+            {% for counselor in counselors %}
+            <div class="counselor-card">
+                
+                <img src="{{ counselor.profile_photo or 'https://ui-avatars.com/api/?name=' + counselor.name }}">
+                <h4>{{ counselor.name }}</h4>
+                <p style="font-size: 0.8rem; color: #777;">{{ counselor.education }}</p>
+                {% set active_req = all_student_requests | selectattr("counselor_id", "equalto", counselor.id) | first %}
+                {% if active_req and active_req.status == 'accepted' %}
+                    <a href="{{ url_for('private_chat_room', request_id=active_req.id) }}" 
+                       class="action-btn" style="background: #28a745; text-decoration: none; display: block;">
+                       ✅ Joined! Enter Chat
+                    </a>
+                {% elif active_req and active_req.status == 'pending' %}
+                    <button class="action-btn" style="background: #ffc107; cursor: default;">⏳ Request Sent</button>
+                {% else %}
+                    <button class="action-btn req-btn" onclick="requestChat({{ counselor.id }})">Request Chat</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="writing-view" class="creative-section hidden">
+        <h2>Write Your Feelings</h2>
+        <p>Express yourself and create a memory of your thoughts.</p>
+        
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <label><b>1. Background</b></label>
+                <input type="file" id="feelings-bg-upload" accept="image/*" class="action-btn" style="background: #eee; color: #333; font-size: 0.8rem;">
+                
+                <p style="margin: 10px 0 5px;">Or use a preset:</p>
+                <div class="preset-grid">
+                    <div class="preset-img temp-thumb" style="background-image:url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400')" onclick="setWritingBg('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800')"></div>
+                    <div class="preset-img temp-thumb" style="background-image:url('https://images.unsplash.com/photo-1511497584788-876760111969?w=400')" onclick="setWritingBg('https://images.unsplash.com/photo-1511497584788-876760111969?w=800')"></div>
+                    <div class="preset-img temp-thumb" style="background-image:url('https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=400')" onclick="setWritingBg('https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800')"></div>
+                    <div class="preset-img temp-thumb" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400')" onclick="setWritingBg('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800')"></div>
+                    <div class="preset-img temp-thumb" style="background-image:url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400')" onclick="setWritingBg('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800')"></div>
+                </div>
+
+                <label><b>2. Font Style</b></label>
+                <select id="writing-font-select" class="action-btn" style="background: white; color: #333; border: 1px solid #ccc;">
+                    <option value="'Segoe UI', sans-serif">Modern</option>
+                    <option value="'Georgia', serif">Serif</option>
+                    <option value="'Courier New', monospace">Typewriter</option>
+                    <option value="'Brush Script MT', cursive">Handwriting</option>
+                    <option value="Impact, sans-serif">Bold</option>
+                </select>
+
+                <label><b>3. Your Paragraph</b></label>
+                <textarea id="writing-input-text" rows="5" placeholder="Write your paragraph here..."></textarea>
+                
+                <button onclick="downloadMyWriting()" class="action-btn" style="background: #4a7c59; margin-top: 15px;">💾 Download Image</button>
+            </div>
+
+            <div style="flex: 1; min-width: 300px;">
+                <div id="writing-preview-box">
+                    <div id="writing-bg-layer" class="writing-bg-layer" style="background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800');"></div>
+                    <div class="writing-overlay"></div>
+                    <p id="writing-display-text">Your heart's words will appear here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="crisisModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(255,0,0,0.5);">
+        <h1 style="color: #d9534f; margin-top: 0;">You're Not Alone ❤️</h1>
+        <p style="font-size: 1.1rem; line-height: 1.6;">It sounds like you're carrying a very heavy burden right now. Please talk to someone who can help.</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #d9534f; text-align: left;">
+            <p style="margin: 5px 0;"><b>National Helpline:</b> 988</p>
+        </div>
+        <button onclick="closeCrisisModal()" class="action-btn" style="background: #6c757d; width: auto; padding: 10px 30px;">I'm talking to someone now</button>
+    </div>
+</div>
+
+<script>
+    // Original Function
+    function changeBg(url) { document.getElementById('bg-body').style.backgroundImage = `url('${url}')`; }
+
+    // Enhanced Navigation
+    $("#btn-show-counselors").click(function(){ 
+        $("#journal-view, #writing-view").addClass('hidden'); 
+        $("#counselor-view").removeClass('hidden'); 
+    });
+    $("#btn-show-journal").click(function(){ 
+        $("#counselor-view, #writing-view").addClass('hidden'); 
+        $("#journal-view").removeClass('hidden'); 
+    });
+    $("#btn-show-writing").click(function(){ 
+        $("#counselor-view, #journal-view").addClass('hidden'); 
+        $("#writing-view").removeClass('hidden'); 
+    });
+
+    function closeCrisisModal() { document.getElementById('crisisModal').classList.add('hidden'); }
+
+    // Original Relaxation Game Logic
+    let isBreathing = false;
+    let breathInterval;
+    function toggleBreathing() {
+        const circle = document.getElementById('breathe-circle');
+        isBreathing = !isBreathing;
+        if (isBreathing) {
+            runBreathCycle();
+            breathInterval = setInterval(runBreathCycle, 8000);
+        } else {
+            clearInterval(breathInterval);
+            circle.classList.remove('breathe-in', 'breathe-out');
+            circle.innerText = "Start";
+        }
+    }
+    function runBreathCycle() {
+        const circle = document.getElementById('breathe-circle');
+        circle.innerText = "In";
+        circle.classList.add('breathe-in');
+        circle.classList.remove('breathe-out');
+        setTimeout(() => {
+            circle.innerText = "Out";
+            circle.classList.add('breathe-out');
+            circle.classList.remove('breathe-in');
+        }, 4000);
+    }
+
+    // Original Music Player Track Change
+    document.getElementById('track-select').onchange = function() {
+        const player = document.getElementById('audio-player');
+        player.src = this.value;
+        player.play();
+    };
+
+    {% if current_emotion == 'Suicidal' %}
+        document.getElementById('crisisModal').classList.remove('hidden');
+    {% endif %}
+
+    // Original Chart Initialization
+    const ctx = document.getElementById('stressChart').getContext('2d');
+    let stressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|tojson if chart_labels else ["Start"]|tojson }},
+            datasets: [{
+                label: 'Stress Score',
+                data: {{ chart_data|tojson if chart_data else [0]|tojson }},
+                borderColor: '#8e94f2',
+                backgroundColor: 'rgba(142, 148, 242, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 5 } },
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Original Request logic
+    function requestChat(counselorId) {
+        $.ajax({
+            url: `/student/request_chat/${counselorId}`,
+            type: 'POST',
+            success: function(response) {
+                if(response.success) {
+                    alert("✨ Request Sent!");
+                    location.reload();
+                } else { alert(response.info); }
+            },
+            error: function() { alert("Error sending request."); }
+        });
+    }
+
+    // NEW: Writing Feature Logic
+    const writingInput = document.getElementById('writing-input-text');
+    const writingDisplay = document.getElementById('writing-display-text');
+    const writingBg = document.getElementById('writing-bg-layer');
+    const writingFont = document.getElementById('writing-font-select');
+
+    writingInput.addEventListener('input', () => {
+        writingDisplay.innerText = writingInput.value || "Your heart's words will appear here...";
+    });
+
+    writingFont.addEventListener('change', () => {
+        writingDisplay.style.fontFamily = writingFont.value;
+    });
+
+    function setWritingBg(url) {
+        writingBg.style.backgroundImage = `url('${url}')`;
+    }
+
+    document.getElementById('feelings-bg-upload').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            writingBg.style.backgroundImage = `url(${event.target.result})`;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    });
+
+    function downloadMyWriting() {
+        const box = document.getElementById('writing-preview-box');
+        html2canvas(box, { useCORS: true, scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'My-Feelings-MindAura.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+
+    const chatBox = document.getElementById('chat-box');
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+</body>
+</html>

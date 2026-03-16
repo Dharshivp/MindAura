@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --accent: #ffd86b;
+        --accent-pink: #ff6aba;
+        --bg-dark: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --text-dim: #94a3b8;
+    }
+
+    body { background: var(--bg-dark); font-family: 'Inter', sans-serif; color: #e2e8f0; margin: 0; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 280px; background: #1e293b; padding: 30px 20px; border-right: 1px solid #334155; position: fixed; height: 100vh; }
+    .sidebar h2 { color: var(--accent); font-weight: 800; margin-bottom: 40px; text-align: center; }
+    .nav-item { display: flex; align-items: center; padding: 14px 20px; color: var(--text-dim); text-decoration: none; border-radius: 12px; margin-bottom: 10px; transition: 0.3s; }
+    .nav-item:hover { background: rgba(255, 216, 107, 0.1); color: var(--accent); }
+
+    /* Main Content */
+    .main-content { flex: 1; margin-left: 280px; padding: 40px; }
+    .glass-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; margin-bottom: 30px; }
+    
+    /* Tables */
+    .table-container { overflow-x: auto; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 15px; background: rgba(255, 255, 255, 0.05); color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
+    td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Forms & Buttons */
+    input, textarea, select { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 12px; border-radius: 10px; color: white; margin-bottom: 15px; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; display: inline-block; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-outline { border: 1px solid var(--accent); color: var(--accent); background: transparent; }
+</style>
+
+<div class="admin-wrapper">
+    <div class="sidebar">
+        <h2>MindAura Admin</h2>
+        <nav>
+            <a href="#students" class="nav-item">Student Database</a>
+            <a href="#counselors" class="nav-item">Manage Counselors</a>
+            <a href="#podcasts" class="nav-item">Podcast Manager</a>
+            <a href="#events" class="nav-item">Live Events</a>
+            <a href="/logout" class="nav-item" style="margin-top: 50px; color: #f87171;">Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="font-weight: 800; margin:0;">Executive Control</h1>
+            <a href="/admin/download_students" class="btn btn-outline">📥 Download Report</a>
+        </div>
+
+        <section id="students" class="glass-card">
+            <h3>Registered Students</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Email</th><th>Phone</th><th>College</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td><span style="color:var(--accent)">{{ student.phone }}</span></td>
+                            <td>{{ student.college }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="counselors" class="glass-card">
+            <h3>Add New Counselor</h3>
+            <form action="/admin_add_counselor" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email Address" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="text" name="education" placeholder="Specialization (e.g. M.A. Psychology)">
+                <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Register Counselor</button>
+            </form>
+
+            <h3 style="margin-top: 40px;">Current Counselors</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Education</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in counselors %}
+                        <tr>
+                            <td>{{ c.name }}</td>
+                            <td>{{ c.education }}</td>
+                            <td>
+                                <a href="/admin/delete_counselor/{{ c.id }}" class="btn btn-danger" onclick="return confirm('Delete counselor?')">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="podcasts" class="glass-card">
+            <h3>Upload New Podcast</h3>
+            <form action="/admin/add_podcast" method="POST">
+                <input type="text" name="title" placeholder="Podcast Title" required>
+                <input type="text" name="video_url" placeholder="YouTube URL" required>
+                <textarea name="description" placeholder="Description" rows="2"></textarea>
+                <button type="submit" class="btn btn-primary">Publish Podcast</button>
+            </form>
+
+            <h3 style="margin-top: 40px;">Existing Podcasts</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Title</th><th>URL</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for p in podcasts %}
+                        <tr>
+                            <td>{{ p.title }}</td>
+                            <td style="color: #60a5fa; font-size: 0.8rem;">{{ p.video_url }}</td>
+                            <td>
+                                <a href="/admin/delete_podcast/{{ p.id }}" class="btn btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="events" class="glass-card">
+            <h3>Schedule Live Event</h3>
+            <form action="/add_live_event" method="POST">
+                <input type="text" name="title" placeholder="Event Title" required>
+                <input type="date" name="date" required>
+                <textarea name="description" placeholder="Event Details"></textarea>
+                <button type="submit" class="btn btn-primary">Schedule Event</button>
+            </form>
+
+            <h3 style="margin-top: 40px;">Active Events</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Event Name</th><th>Date</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for e in events %}
+                        <tr>
+                            <td>{{ e.title }}</td>
+                            <td>{{ e.date_posted }}</td>
+                            <td>
+                                <a href="/delete_event/{{ e.id }}" class="btn btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

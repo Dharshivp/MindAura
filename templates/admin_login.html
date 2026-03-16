@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url("https://images.unsplash.com/photo-1601597115523-0a7e0f8b57c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8YWRtaW58fHx8fDE2NzQ0MTI1NzQ&ixlib=rb-4.0.3&q=80&w=1920") center/cover no-repeat fixed;
+    color: #fff;
+}
+
+/* Overlay for readability */
+.overlay {
+    background: rgba(0,0,0,0.65);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* Glassmorphism login card */
+.login-box {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 25px;
+    padding: 50px 60px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    animation: fadeIn 1s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.login-box h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #ffd86b;
+    text-shadow: 1px 1px 10px rgba(0,0,0,0.5);
+}
+
+.login-box p {
+    font-size: 1rem;
+    margin-bottom: 25px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* Input fields */
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 1rem;
+}
+
+.login-box input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: #ffd86b;
+    box-shadow: 0 0 10px #ffd86b;
+}
+
+/* Button */
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 30px;
+    background: linear-gradient(90deg, #6a9cff, #e5dcc5);
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(90deg, #e5dcc5, #6a9cff);
+}
+
+/* Extra paragraph below */
+.extra-info {
+    margin-top: 30px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    text-align: left;
+}
+</style>
+
+<div class="overlay">
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <p>Access the MindAura administration panel to manage students, counselors, and monitor overall platform activity.</p>
+
+        <form method="POST">
+            <input type="email" name="email" placeholder="Enter your admin email" required>
+            <input type="password" name="password" placeholder="Enter your password" required>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+
+        <div class="extra-info">
+            <p><strong>What you can do as an Admin:</strong></p>
+            <ul>
+                <li>View all student profiles and emotional logs.</li>
+                <li>Manage counselor accounts and assign responsibilities.</li>
+                <li>Monitor high-risk students and platform alerts.</li>
+                <li>Generate reports for institutional analysis.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

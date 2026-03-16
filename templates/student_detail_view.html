@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics | {{ student.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 40px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .log-entry { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .stress-high { color: #d9534f; font-weight: bold; }
+        .stress-low { color: #4a7c59; }
+        .back-btn { margin-bottom: 20px; display: inline-block; color: #4a7c59; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/counselor/view_students" class="back-btn">← Back to Directory</a>
+        <h1>Emotional Profile: {{ student.name }}</h1>
+        <p>Email: {{ student.email }} | College: {{ student.college }}</p>
+        
+        <hr>
+        
+        <h3>Recent Journal Summaries</h3>
+        {% if not logs %}
+            <p>No mood logs available for this student yet.</p>
+        {% else %}
+            {% for log in logs|reverse %}
+            <div class="log-entry">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>Detected Emotion: {{ log.emotion }}</strong>
+                    <span class="{% if log.stress >= 4 %}stress-high{% else %}stress-low{% endif %}">
+                        Stress Level: {{ log.stress }}/5
+                    </span>
+                </div>
+                <p style="color: #555; font-style: italic;">"{{ log.text }}"</p>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="boost-section" style="background: #e7f3ff; padding: 20px; border-radius: 15px; margin-top: 20px;">
+    <h3>🚀 Send a Boosting Message</h3>
+    <form action="{{ url_for('boost_student', student_id=student.id) }}" method="POST">
+        <textarea name="message" rows="3" class="form-control" 
+            placeholder="e.g., 'I noticed you've been feeling down lately. I'm here if you want to talk. Shall we hop on a private chat?'" required></textarea>
+        <button type="submit" class="action-btn" style="background: #007bff; color: white; margin-top: 10px;">
+            Send Message & Request Private Chat
+        </button>
+    </form>
+</div>
+</body>
+</html>

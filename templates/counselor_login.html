@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    body {
+        /* Professional, deep-toned calming background */
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                    url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: #fff;
+    }
+
+    .main-wrapper {
+        display: flex;
+        width: 90%;
+        max-width: 1100px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        border-radius: 30px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+
+    /* Left Side: Inspiration & Info */
+    .info-section {
+        flex: 1;
+        padding: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .info-section h2 { font-size: 2.5rem; margin-bottom: 20px; font-weight: 300; }
+    .info-section p { font-size: 1.1rem; line-height: 1.6; color: #e0e0e0; }
+
+    .feature-list { margin-top: 30px; }
+    .feature-item { display: flex; align-items: center; margin-bottom: 20px; }
+    .feature-icon { 
+        width: 40px; height: 40px; background: #4a7c59; 
+        border-radius: 10px; display: flex; align-items: center; 
+        justify-content: center; margin-right: 15px; font-size: 1.2rem;
+    }
+
+    /* Right Side: The Login Form */
+    .login-section {
+        flex: 0.8;
+        background: #fff;
+        padding: 60px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-header { text-align: center; margin-bottom: 30px; }
+    .login-header span { font-size: 3rem; }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+    }
+
+    .btn-login {
+        background-color: #4a7c59;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        width: 100%;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-login:hover { background-color: #3a6347; transform: translateY(-3px); }
+
+    @media (max-width: 900px) {
+        .main-wrapper { flex-direction: column; }
+        .info-section { display: none; }
+    }
+</style>
+
+<div class="main-wrapper">
+    <div class="info-section">
+        <h2>Counselor Portal</h2>
+        <p>Your expertise is the bridge between a student’s struggle and their success. 🌟</p>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">🛡️</div>
+                <div><strong>Secure Sessions:</strong> End-to-end encrypted chats for total privacy.</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div><strong>Insightful Data:</strong> Track student emotional trends over time.</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🌿</div>
+                <div><strong>Holistic Support:</strong> Tools built for empathy and effective therapy.</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; font-style: italic; color: #ccc;">
+            "To cure sometimes, to relieve often, to comfort always."
+        </div>
+    </div>
+
+    <div class="login-section">
+        <div class="login-header">
+            <span>🌿</span>
+            <h3 class="mt-2">Welcome Back</h3>
+            <p class="text-muted">Sign in to your professional dashboard</p>
+        </div>
+
+        <form method="POST">
+            <input class="form-control" name="email" placeholder="Professional Email" required>
+            <input class="form-control" type="password" name="password" placeholder="Password" required>
+            
+            <div class="d-flex justify-content-between mb-4" style="font-size: 0.85rem;">
+                <label><input type="checkbox"> Remember Me</label>
+                <a href="#" style="color: #4a7c59; text-decoration: none;">Forgot Password?</a>
+            </div>
+
+            <button class="btn-login">Access Dashboard 🔓</button>
+        </form>
+
+        <p class="text-center mt-4" style="font-size: 0.8rem; color: #999;">
+            Admin Support: support@mindaura.edu
+        </p>
+    </div>
+</div>
+
+{% endblock %}

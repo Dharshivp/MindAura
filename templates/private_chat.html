@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindAura | Private Session</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root { 
+            --accent: #8e94f2; 
+            --wa-bg: #e5ddd5; 
+            --wa-left: #ffffff; 
+            --wa-right: #dcf8c6; /* WhatsApp light green */
+        }
+
+        body { 
+            background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Helvetica, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+
+        .main-wrapper {
+            width: 95%;
+            max-width: 1200px;
+            height: 85vh;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Sidebar */
+        .info-sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Chat Container */
+        .chat-container { 
+            flex-grow: 1;
+            background: white; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+            overflow: hidden; 
+        }
+        
+        /* Header */
+        .chat-header { 
+            padding: 15px 25px; 
+            border-bottom: 1px solid #eee; 
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Message Area with WhatsApp Pattern */
+        #chat-window { 
+            flex-grow: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background-color: var(--wa-bg);
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+        }
+
+        /* Message Bubble Logic */
+        .msg { 
+            padding: 8px 12px; 
+            font-size: 0.95rem;
+            max-width: 65%; 
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.15);
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* LEFT SIDE (Theirs / Counselor) */
+        .msg.theirs { 
+            align-self: flex-start; 
+            background: var(--wa-left); 
+            color: #333; 
+            border-radius: 0 12px 12px 12px;
+        }
+
+        /* RIGHT SIDE (Mine / Student) */
+        .msg.mine { 
+            align-self: flex-end; 
+            background: var(--wa-right); /* Green like your image */
+            color: #333; 
+            border-radius: 12px 0 12px 12px;
+        }
+
+        /* Message Timestamp */
+        .time {
+            font-size: 0.7rem;
+            color: #888;
+            align-self: flex-end;
+            margin-top: 4px;
+        }
+
+        /* Input Bar */
+        .input-area { 
+            padding: 15px 20px; 
+            display: flex; 
+            gap: 10px; 
+            background: #f0f0f0; 
+            align-items: center;
+        }
+
+        textarea { 
+            flex-grow: 1; 
+            border-radius: 25px; 
+            border: 1px solid #ddd; 
+            padding: 10px 20px; 
+            resize: none; 
+            height: 22px; 
+            outline: none;
+            font-family: inherit;
+        }
+
+        .send-btn { 
+            background: #075e54; /* WA Dark Green */
+            color: white; 
+            border: none; 
+            width: 45px;
+            height: 45px;
+            border-radius: 50%; 
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .sidebar-card { background: white; padding: 15px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #eee; line-height: 1.5; }
+        
+        /* Sidebar Titles */
+        h4 { margin: 0 0 8px 0; color: #555; font-size: 0.85rem; text-transform: uppercase; }
+
+        @media (max-width: 800px) { .info-sidebar { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="info-sidebar">
+        <div>
+            <h4>Session Details</h4>
+            <div class="sidebar-card">
+                <strong>ID:</strong> #{{ chat_req.id }}<br>
+                <strong>Encryption:</strong> AES-256 SSL
+            </div>
+        </div>
+        <div>
+            <h4>Privacy Policy</h4>
+            <div class="sidebar-card">
+                This chat is private. No data is shared with third parties.
+            </div>
+        </div>
+        <div>
+            <h4>Emergency</h4>
+            <div class="sidebar-card" style="border-left: 4px solid #ff4d4d;">
+                Immediate danger? <br>Call <b>988</b> or local help.
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div>
+                <strong style="font-size: 1.1rem;">MindAura Private Session</strong>
+                <div style="font-size: 0.8rem; color: #2ecc71;">● Secure Connection Active</div>
+            </div>
+            {% if session.get('counselor_id') %}
+            <form action="{{ url_for('end_session', request_id=chat_req.id) }}" method="POST">
+                <button type="submit" style="background:#ff4d4d; color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer; font-weight:bold;">End Session</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div id="chat-window">
+            </div>
+
+        <div class="input-area">
+            <textarea id="msg-input" placeholder="Type a message..."></textarea>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const requestId = {{ chat_req.id }};
+
+    function fetchMessages() {
+        $.get("/get_private_msgs/" + requestId, function(data) {
+            if (data.status === 'completed') {
+                alert("Session has ended.");
+                window.location.href = "{{ url_for('dashboard') }}";
+                return;
+            }
+
+            let html = "";
+            const now = new Date();
+            const timeStr = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+
+            data.messages.forEach(m => {
+                // 'm.side' is 'mine' or 'theirs' from your Python code
+                html += `
+                    <div class="msg ${m.side}">
+                        ${m.message}
+                        <span class="time">${timeStr}</span>
+                    </div>`;
+            });
+            
+            const chatWin = $("#chat-window");
+            if(chatWin.html() !== html) {
+                chatWin.html(html);
+                chatWin.scrollTop(chatWin[0].scrollHeight);
+            }
+        });
+    }
+
+    function sendMessage() {
+        const text = $("#msg-input").val().trim();
+        if(!text) return;
+        $.ajax({
+            url: "/send_private_msg",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ request_id: requestId, message: text }),
+            success: function() {
+                $("#msg-input").val("");
+                fetchMessages();
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        fetchMessages();
+        setInterval(fetchMessages, 2000);
+        
+        $("#msg-input").on("keypress", function(e) {
+            if(e.which == 13 && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.login-page{
+    min-height:100vh;
+    background:
+   
+    url("https://i.pinimg.com/736x/fd/81/43/fd814340bc336dc0d0b0af1f1557b060.jpg") center/cover no-repeat;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Glass card */
+.login-box{
+    
+    padding:50px 60px;
+    border-radius:25px;
+    width:420px;
+    
+    text-align:center;
+}
+
+.login-box h3{
+    font-size:2.2rem;
+    font-weight:800;
+    color:#1f3a5f;
+}
+
+.login-box p {
+    color: #f3eded;
+    margin-bottom: 30px; /* Increased slightly to give the larger text breathing room */
+    font-size: 1.8rem;    /* Increased from 1.05rem */
+    line-height: 1.6;    /* Improves readability for larger text */
+    font-weight: 800;    /* Ensures the text stays clean and professional */
+    letter-spacing: 0.2px; /* Subtle spacing for a premium feel */
+}
+
+.login-box input{
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #ccddee;
+    font-size:1rem;
+}
+
+.login-box input:focus{
+    outline:none;
+    box-shadow:0 0 0 2px #fd5293;
+}
+
+.login-btn{
+    width:100%;
+    padding:12px;
+    border-radius:25px;
+    background:#f63b89;
+    border:none;
+    color:white;
+    font-size:1.1rem;
+    font-weight:700;
+    transition:.3s;
+}
+
+.login-btn:hover{
+    background:#2f6fe0;
+    transform:translateY(-2px);
+}
+
+.extra-text{
+    margin-top:18px;
+    font-size:.95rem;
+}
+
+.extra-text a{
+    color:#3b82f6;
+    text-decoration:none;
+    font-weight:600;
+}
+</style>
+
+<div class="login-page">
+
+  <div class="login-box">
+
+    <h3>Welcome Back 🌿</h3>
+    <p>
+      Log in to continue your mental wellness journey with MindAura.  
+      Your emotional well-being matters to us.
+    </p>
+
+    <form method="POST">
+
+      <input class="form-control mb-3" 
+             name="email" 
+             placeholder="Enter your email" required>
+
+      <input class="form-control mb-3" 
+             name="password" 
+             type="password" 
+             placeholder="Enter your password" required>
+
+      <button class="login-btn">Login</button>
+
+    </form>
+
+    <div class="extra-text">
+      Don’t have an account?  
+      <a href="{{ url_for('signup') }}">Create one here</a>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

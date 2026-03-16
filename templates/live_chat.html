@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MindAura | Live Session</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .chat-container { max-width: 600px; margin: 50px auto; border: 1px solid #ddd; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; height: 80vh; background: white; }
+        .chat-header { background: #4a7c59; color: white; padding: 15px; text-align: center; }
+        #chat-window { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f9f9f9; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; }
+        .mine { align-self: flex-end; background: #8e94f2; color: white; }
+        .theirs { align-self: flex-start; background: #e2e2e2; color: #333; }
+        .input-area { display: flex; padding: 15px; border-top: 1px solid #ddd; }
+        input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        button { margin-left: 10px; padding: 10px 20px; background: #4a7c59; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>Live Support Session</h3>
+        <small>Connected with {{ partner_name }}</small>
+    </div>
+    <div id="chat-window">
+        </div>
+    <div class="input-area">
+        <input type="text" id="msg-input" placeholder="Type your message...">
+        <button id="send-btn">Send</button>
+    </div>
+</div>
+
+<script>
+    const requestId = "{{ request_id }}";
+
+    function fetchMessages() {
+        $.get(`/get_messages/${requestId}`, function(data) {
+            $('#chat-window').empty();
+            data.forEach(msg => {
+                const side = msg.sender_type === "{{ user_role }}" ? 'mine' : 'theirs';
+                $('#chat-window').append(`<div class="msg ${side}">${msg.message}</div>`);
+            });
+            $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+        });
+    }
+
+    $('#send-btn').click(function() {
+        const text = $('#msg-input').val();
+        if(!text) return;
+        $.post(`/send_message/${requestId}`, { message: text }, function() {
+            $('#msg-input').val('');
+            fetchMessages();
+        });
+    });
+
+    // Poll for new messages every 2 seconds
+    setInterval(fetchMessages, 2000);
+    fetchMessages();
+</script>
+</body>
+</html>

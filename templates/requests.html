@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Incoming Requests | MindAura</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .request-card {
+            background: white; padding: 20px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px;
+        }
+        .btn { padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .btn-accept { background: #4a7c59; color: white; }
+        .btn-back { color: #666; display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/counselor_dashboard" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        <h1>📥 Received Requests</h1>
+        <hr>
+        
+        {% if requests %}
+            {% for req in requests %}
+            <div class="request-card">
+                <div>
+                    <h3 style="margin: 0;">Student ID: {{ req.student_id }}</h3>
+                    <p style="color: #666; font-size: 0.9rem;">Requested on: {{ req.id }} (Pending Approval)</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('accept_chat', request_id=req.id) }}" class="btn btn-accept">Accept & Start Chat</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No new requests at the moment.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

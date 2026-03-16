@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    /* Background and Page Layout */
+    .signup-page {
+        min-height: 100vh;
+        background: url("https://i.pinimg.com/1200x/e1/6b/7e/e16b7e7d887cb9307772696dd950413a.jpg") center/cover no-repeat;
+        display: flex;
+        justify-content: flex-end; /* Align card to the right */
+        align-items: center;
+        padding-right: 8%;
+    }
+
+    /* Animated Glass Card */
+    .signup-box {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        padding: 40px 50px;
+        border-radius: 35px;
+        width: 480px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        animation: fadeUp 1s ease-out;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .signup-box h3 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #ff6aba;
+        margin-bottom: 15px;
+    }
+
+    .signup-box p {
+        color: #f7f2f2;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    /* Input Fields */
+    .signup-box input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 12px;
+        border-radius: 14px;
+        color: white;
+        margin-bottom: 15px;
+        width: 100%;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .signup-box input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .signup-box input:focus {
+        border-color: #ff6aba;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Phone and OTP Row Layout */
+    .phone-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .phone-container input {
+        margin-bottom: 0;
+        flex: 1;
+    }
+
+    .otp-btn {
+        background: rgba(185, 147, 255, 0.3);
+        border: 1px solid #b993ff;
+        color: white;
+        border-radius: 14px;
+        padding: 0 15px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: 0.3s;
+        white-space: nowrap;
+    }
+
+    .otp-btn:hover:not(:disabled) {
+        background: #b993ff;
+    }
+
+    .otp-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Create Account Button */
+    .signup-btn {
+        width: 100%;
+        padding: 13px;
+        margin-top: 10px;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #ff6aba, #b993ff);
+        border: none;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .3s;
+        box-shadow: 0 4px 15px rgba(255, 106, 186, 0.3);
+    }
+
+    .signup-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 106, 186, 0.5);
+    }
+
+    .extra-text {
+        margin-top: 20px;
+        color: #fff;
+    }
+
+    .extra-text a {
+        color: #ff6aba;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .extra-text a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="signup-page">
+    <div class="signup-box">
+        <h3>Join MindAura 🌿</h3>
+        <p>Your journey toward emotional well-being starts here. Verify your mobile to secure your account.</p>
+
+        <form method="POST" id="signupForm" action="{{ url_for('signup') }}">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="text" name="college" placeholder="College / University" required>
+
+            <div class="phone-container">
+                <input type="text" name="phone" id="phone" placeholder="Mobile Number" required>
+                <button type="button" class="otp-btn" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+            </div>
+
+            <div id="otp-section" style="display: block; margin-top: 10px;">
+                <input type="text" name="otp" id="otp" placeholder="Enter 6-Digit Code" required>
+                
+            </div>
+
+            <input type="password" name="password" placeholder="Create Password" required>
+
+            <button type="submit" class="signup-btn">Create Account</button>
+        </form>
+
+        <div class="extra-text">
+            Already part of MindAura? 
+            <a href="{{ url_for('login') }}">Login here</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerOn = false;
+
+    function sendOTP() {
+        const phone = document.getElementById('phone').value;
+        const btn = document.getElementById('sendOtpBtn');
+
+        if (!phone) {
+            alert("Please enter your mobile number first.");
+            return;
+        }
+
+        if (timerOn) return;
+
+        // AJAX request to Flask
+        fetch('/send_otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Ensure section is visible
+                document.getElementById('otp-section').style.display = 'block';
+                startTimer(60, btn);
+                alert("OTP Sent! Check your Python terminal/console.");
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert("Could not connect to the server.");
+        });
+    }
+
+    function startTimer(seconds, btn) {
+        timerOn = true;
+        let remaining = seconds;
+        
+        const countdown = setInterval(() => {
+            remaining--;
+            btn.disabled = true;
+            btn.innerText = `Resend in ${remaining}s`;
+            
+            if (remaining <= 0) {
+                clearInterval(countdown);
+                btn.disabled = false;
+                btn.innerText = "Send OTP";
+                timerOn = false;
+            }
+        }, 1000);
+    }
+</script>
+
+{% endblock %}

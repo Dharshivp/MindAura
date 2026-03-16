@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Registration Successful!</h2>
+<p>Event: {{ event.title }}</p>
+<p>Name: {{ registration.name }}</p>
+<p>Pass Number: <strong>{{ registration.pass_number }}</strong></p>
+<p>School/College: {{ registration.school_college }}</p>
+<p>Contact: {{ registration.contact }}</p>
+<p>Location: {{ registration.location }}</p>
+<p>Timing: {{ registration.timing }}</p>
+<p>Additional Details: {{ registration.details }}</p>
+
+<a href="{{ url_for('home') }}">Back to Home</a>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url("https://images.unsplash.com/photo-1508780709619-79562169bc64?fit=crop&w=1470&q=80") center/cover no-repeat fixed;
+    color: #fff;
+}
+
+.overlay {
+    background: rgba(0, 0, 0, 0.65);
+    min-height: 100vh;
+    padding: 50px 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.form-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 40px 50px;
+    border-radius: 20px;
+    width: 450px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #ffd86b;
+}
+
+.form-container p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.form-container label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-container input,
+.form-container textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+}
+
+.form-container textarea {
+    resize: none;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background: #ffd86b;
+    color: #000;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.form-container button:hover {
+    background: #ffc107;
+}
+
+/* Event details section */
+.event-details {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(0,0,0,.35);
+    border-radius: 15px;
+}
+
+.event-details h3 {
+    color: #ffd86b;
+    margin-bottom: 10px;
+}
+
+.event-details p {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+</style>
+
+<div class="overlay">
+    <div class="form-container">
+        <h2>Register for Event</h2>
+
+        <div class="event-details">
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <p><strong>Date:</strong> {{ event.date_posted.strftime("%b %d, %Y") }}</p>
+            <p><strong>Time:</strong> {{ event.time or "10:00 AM - 12:00 PM" }}</p>
+            <p><strong>Location:</strong> {{ event.location or "To be announced" }}</p>
+        </div>
+
+        <form method="POST">
+            <label>Name:</label>
+            <input type="text" name="name" placeholder="Your Full Name" required>
+
+            <label>School/College:</label>
+            <input type="text" name="school_college" placeholder="Your School/College" required>
+
+            <label>Contact Number:</label>
+            <input type="text" name="contact" placeholder="+91 98765 43210" required>
+
+            <label>Location:</label>
+            <input type="text" name="location" placeholder="Your City" required>
+
+            <label>Event Timing:</label>
+            <input type="text" name="timing" placeholder="10:00 AM - 12:00 PM" required>
+
+            <label>More Details:</label>
+            <textarea name="details" rows="3" placeholder="Any specific notes or requirements"></textarea>
+
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

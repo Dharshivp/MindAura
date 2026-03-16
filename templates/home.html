@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: url("https://images.unsplash.com/photo-1526256262350-7da7584cf5eb") center/cover no-repeat fixed;
+}
+
+/* overlay for readability */
+.overlay {
+    background: rgba(0,0,0,.55);
+}
+
+/* NAV BAR */
+.nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(16px);
+    padding: 20px 70px;
+    border-radius: 70px;
+    display: flex;
+    gap: 45px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.45), inset 0 0 15px rgba(255,255,255,.2);
+    z-index: 1000;
+}
+
+.nav a {
+    text-decoration: none;
+    color: rgb(37, 34, 34);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    position: relative;
+    transition: .35s ease;
+}
+
+.nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg,#e5dcc5,#6a9cff);
+    border-radius: 5px;
+    transition: .35s;
+}
+
+.nav a:hover::after {
+    width: 100%;
+}
+
+.nav a:hover {
+    color: #ffd86b;
+    transform: translateY(-2px);
+}
+
+/* HERO */
+.hero {
+    min-height: 100vh;
+    padding: 140px 8%;
+    display: flex;
+    align-items: center;
+}
+
+.hero-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    color: white;
+}
+
+.hero video {
+    width: 100%;
+    border-radius: 30px;
+    box-shadow: 0 20px 45px rgba(0,0,0,.5);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+}
+
+.hero h1 {
+    font-size: 4.8rem;
+    font-weight: 900;
+}
+
+.hero p {
+    font-size: 1.6rem;
+    line-height: 1.8;
+    margin: 25px 0;
+    opacity: .9;
+}
+
+.hero .btn {
+    padding: 15px 40px;
+    border-radius: 35px;
+    background-color: #ffd86b;
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* SECTIONS */
+.section {
+    padding: 140px 10%;
+    display: flex;
+    gap: 70px;
+    align-items: center;
+    color: white;
+    opacity: 0;
+    transform: translateY(70px);
+    transition: 1s;
+}
+
+.section.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section img {
+    width: 360px;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.4);
+}
+
+.section p {
+    font-size: 1.3rem;
+    line-height: 1.8;
+    opacity: .9;
+}
+
+/* PODCAST SECTION */
+.podcasts-section {
+    padding: 100px 10%;
+    color: white;
+}
+
+.podcast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+
+
+.podcast-card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.3s;
+}
+
+.podcast-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255,255,255,0.15);
+}
+
+.podcast-video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.podcast-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* CONTACT */
+.contact {
+    background: #000;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+/* LIVE EVENTS / Notifications */
+.notifications {
+    padding: 80px 10%;
+    color: white;
+}
+
+.notif-card {
+    background: rgba(255,255,255,.15);
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.3);
+}
+
+.notif-card a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #ffd86b;
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: .3s;
+}
+
+.notif-card a:hover {
+    background: #ffc107;
+    transform: translateY(-2px);
+}
+
+/* NEW: Popup Modal Styling */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+}
+.event-popup {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    padding: 40px; border-radius: 30px; width: 90%; max-width: 550px;
+    text-align: center; border: 2px solid var(--accent);
+    box-shadow: 0 0 50px rgba(255, 216, 107, 0.3);
+    animation: zoomIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+@keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popup-badge { background: #ffd86b; color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; margin-bottom: 20px; display: inline-block; }
+.close-btn { margin-top: 25px; background: transparent; border: 1px solid #fff; color: white; padding: 10px 25px; border-radius: 25px; cursor: pointer; transition: 0.3s; }
+.close-btn:hover { background: white; color: black; }
+
+</style>
+
+<div class="overlay">
+
+<div class="nav">
+  <a href="#about">About</a>
+  <a href="#features">Features</a>
+  <a href="#podcasts">Podcasts</a> <a href="#contact">Contact</a>
+  <a href="{{ url_for('admin_login') }}" style="margin-left:30px; color:#053f43;">Alpha Access</a>
+  <a href="{{ url_for('counselor_login') }}" style="color:#340543;">Care Hub</a>
+</div>
+
+<div class="hero">
+  <div class="hero-box">
+    <video autoplay muted loop playsinline>
+      <source src="{{ url_for('static', filename='videos/intro.mp4') }}" type="video/mp4">
+    </video>
+    <div>
+        <h1>MindAura</h1>
+        <p>
+        MindAura is an AI-powered mental wellness platform designed exclusively 
+        for higher education students. It analyzes emotional inputs in real time, 
+        detects stress levels, tracks mood patterns and ensures timely psychological support.
+        </p>
+        <a href="/signup" class="btn btn-light btn-lg">Get Started</a>
+    </div>
+  </div>
+</div>
+
+<div id="about" class="section animate">
+<img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61">
+<div>
+<h2>🌿 What is MindAura?</h2>
+<p>
+MindAura is a smart digital mental health assistant that continuously monitors 
+students’ emotional well-being using Natural Language Processing and AI models. 
+It understands feelings expressed through text, recognizes early signs of anxiety, 
+depression or burnout and provides immediate support resources while keeping data secure.
+</p>
+</div>
+</div>
+
+<div id="features" class="section animate">
+<img src="https://images.unsplash.com/photo-1551434678-e076c223a692">
+<div>
+<h2>🤖 What Does It Do?</h2>
+<p>
+The system processes emotional inputs, performs sentiment analysis, classifies stress levels, 
+generates personalized coping strategies and automatically alerts counselors in critical situations. 
+It also maintains emotional trend reports to help institutions understand student wellness patterns.
+</p>
+</div>
+</div>
+
+<div id="podcasts" class="podcasts-section">
+    <h2 style="font-size: 2.5rem; text-align: center;">🎙️ MindAura Podcasts</h2>
+    <div class="podcast-grid">
+        {% for podcast in podcasts %}
+        <div class="podcast-card">
+            <div class="podcast-video-wrapper">
+                <iframe src="{{ podcast.video_url.replace('watch?v=', 'embed/') }}" allowfullscreen></iframe>
+            </div>
+            <h3>{{ podcast.title }}</h3>
+            <p style="opacity: 0.8; font-size: 0.9rem;">{{ podcast.description }}</p>
+        </div>
+        {% else %}
+        <p style="text-align: center; grid-column: span 3;">Stay tuned! Emotional wellness podcasts are coming soon.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="help" class="section animate">
+<img src="https://images.unsplash.com/photo-1507537297725-24a1c029d3ca">
+<div>
+<h2>💙 How It Helps Students</h2>
+<p>
+MindAura promotes emotional awareness, reduces academic stress, improves focus and 
+prevents mental health crises by providing early interventions. Students receive 
+real-time support, self-care techniques, motivational insights and professional help 
+when needed — creating a healthier learning environment.
+</p>
+</div>
+</div>
+
+<div id="contact" class="contact">
+<h2>📩 Contact MindAura Team</h2>
+<p>Email: support@mindaura.com</p>
+<p>Phone: +91 98765 43210</p>
+<p>Empowering Student Minds Through AI & Care</p>
+</div>
+
+<div class="notifications">
+    <h2>📢 Live Events & Updates</h2>
+    {% for notif in notifications %}
+        <div class="notif-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3>{{ notif.title }}</h3>
+                    <p>{{ notif.description }}</p>
+                    <div style="margin-top: 10px; font-weight: bold; color: #ffd86b;">
+                        <span>📍 {{ notif.location or 'Venue TBD' }}</span>
+                        <span style="margin-left: 20px;">⏰ {{ notif.time or 'Time TBD' }}</span>
+                    </div>
+                </div>
+                <small style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 10px;">
+                    {{ notif.date_posted.strftime("%b %d, %Y") }}
+                </small>
+            </div>
+        </div>
+    {% else %}
+        <p>No live events at the moment.</p>
+    {% endfor %}
+</div>
+
+<script>
+const sections = document.querySelectorAll(".animate");
+window.addEventListener("scroll", () => {
+    sections.forEach(s => {
+        if (s.getBoundingClientRect().top < window.innerHeight - 120) {
+            s.classList.add("show")
+        }
+    })
+})
+</script>
+
+{% endblock %}
